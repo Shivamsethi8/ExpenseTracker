@@ -1,0 +1,36 @@
+import os
+import sys
+
+sys.path.insert(
+    0,
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "source")
+)
+import argparse
+from PyQt5 import QtWidgets
+
+import expense_tracker
+
+
+def start_expense_tracker():
+    app = QtWidgets.QApplication(sys.argv)
+    expense_tracker_window = expense_tracker.ExpenseTracker()
+    expense_tracker_window.show()
+    app.exec_()
+
+
+def get_version():
+    return expense_tracker.version
+
+
+parser = argparse.ArgumentParser(
+    prog="expense tracker", description="Personal Task Manager."
+)
+parser.add_argument(
+    "-v", "--version",
+    action="version",
+    version="%(prog)s {}".format(get_version()),
+    help="Display application version."
+)
+parser.set_defaults(func=start_expense_tracker)
+args = parser.parse_args()
+args.func()
