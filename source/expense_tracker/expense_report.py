@@ -1,9 +1,11 @@
+import csv
 import sys
 import os
 import time
 from datetime import datetime, timedelta
 
 from PyQt5 import QtCore, QtGui, QtWidgets, QtChart
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QTableWidgetItem
 
 from expense_tracker import config, version
 
@@ -202,6 +204,60 @@ class MainWindow(QtWidgets.QMainWindow, object):
         self.setWindowTitle("Expense")
         self.setCentralWidget(ExpenseTrackerWidget())
 
+        # Open File
+        openFile = QtWidgets.QAction('Open', self)
+        openFile.setShortcut('Ctrl+O')
+        openFile.setStatusTip('Open New File')
+        openFile.triggered.connect(self.showDialog)
+
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+
+        # Save File
+        saveFile = QtWidgets.QAction('Export', self)
+        saveFile.setShortcut('Ctrl+S')
+        saveFile.setStatusTip('Export as CSV')
+        saveFile.triggered.connect(self.exportDialog)
+
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(openFile)
+        fileMenu.addAction(saveFile)
+
+    def showDialog(self):
+        self.check_change = False
+        path = QFileDialog.getOpenFileName(self, 'Open CSV', os.getenv('HOME'), 'CSV(*.csv)')
+        if path[0] != '':
+            with open(path[0], newline='') as csv_file:
+                self.setRowCount(0)
+                self.setColumnCount(10)
+                my_file = csv.reader(csv_file, dialect='excel')
+                for row_data in my_file:
+                    row = self.rowCount()
+                    self.insertRow(row)
+                    if len(row_data) > 10:
+                        self.setColumnCount(len(row_data))
+                    for column, stuff in enumerate(row_data):
+                        item = QTableWidgetItem(stuff)
+                        self.setItem(row, column, item)
+        self.check_change = True
+
+    def exportDialog(self):
+        path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save CSV', os.getenv('HOME'), 'CSV(*.csv)')
+        if path[0] != '':
+            with open(path[0], 'w') as csv_file:
+                writer = csv.writer(csv_file, dialect='excel')
+                for row in range(self.rowCount()):
+                    row_data = []
+                    for column in range(self.columnCount()):
+                        item = self.item(row, column)
+                        if item is not None:
+                            row_data.append(item.text())
+                        else:
+                            row_data.append('')
+                    writer.writerow(row_data)
+
 
 class PieChartViewer(QtWidgets.QDialog):
     def __init__(self, title, data=None, parent=None):
@@ -318,6 +374,3 @@ if __name__ == "__main__":
     window.resize(800, 600)
     window.show()
     app.exec_()
-
-
-
