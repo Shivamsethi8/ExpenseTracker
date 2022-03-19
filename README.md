@@ -1,6 +1,6 @@
 # Expence Tracker
 
-This is the expense tracking application.
+This is the expense tracking application Using Azure.
 
 We present an ‘Expense Tracker’ to efficiently manage house-old budget. Our system will allow user to keep track of their expenses. Some statistical analysis has to be done to be able to give users correct information on their expenses and help them spend better.
 
